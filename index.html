@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Orçamentos | Telecomunicações</title>
+<link rel="stylesheet" href="css/style.css">
+<!-- print.css define o template visual do documento (.pdf-doc), usado no
+     preview em tela, na geração do PDF e na impressão — por isso é carregado
+     sempre, e não apenas com media="print". As regras exclusivas de
+     impressão ficam dentro do bloco @media print do próprio arquivo. -->
+<link rel="stylesheet" href="css/print.css">
+</head>
+<body>
+
+<!-- ======================= TOASTS ======================= -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<!-- ======================= TOPBAR ======================= -->
+<header class="topbar">
+  <div class="topbar__brand">
+    <img id="topbarLogo" class="topbar__logo" src="assets/logos/logo_newnitro.png" alt="Logo da empresa">
+    <div class="topbar__title">
+      <span class="topbar__eyebrow">Sistema de Orçamentos</span>
+      <span class="topbar__doc-number" id="topbarDocNumber">ORC-2026-000001</span>
+    </div>
+  </div>
+
+  <nav class="topbar__actions">
+    <button class="btn btn--ghost" id="btnNovo" data-tip="Novo orçamento">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Novo</span>
+    </button>
+    <button class="btn btn--ghost" id="btnSalvar" data-tip="Salvar rascunho">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      <span>Salvar</span>
+    </button>
+    <button class="btn btn--ghost" id="btnCarregar" data-tip="Carregar rascunho">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M21 8v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2Z"/></svg>
+      <span>Carregar</span>
+    </button>
+    <button class="btn btn--ghost" id="btnLimpar" data-tip="Limpar formulário">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+      <span>Limpar</span>
+    </button>
+    <span class="topbar__divider"></span>
+    <button class="btn btn--outline" id="btnPreview">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Visualizar</span>
+    </button>
+    <button class="btn btn--outline" id="btnImprimir">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+      <span>Imprimir</span>
+    </button>
+    <button class="btn btn--icon-only" id="btnMenuMobile" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" class="icon"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+  </nav>
+</header>
+
+<!-- ======================= MAIN ======================= -->
+<main class="app">
+
+  <!-- ---------- Cabeçalho do Orçamento ---------- -->
+  <section class="card card--hero">
+    <div class="hero__doc">
+      <h1 class="hero__title" id="heroTitle">Orçamento para Prestação de Serviços e Produtos de Telecomunicações</h1>
+      <div class="hero__meta">
+        <div class="meta-field">
+          <label for="numeroOrcamento">Número</label>
+          <input type="text" id="numeroOrcamento" readonly>
+        </div>
+        <div class="meta-field">
+          <label for="dataOrcamento">Data</label>
+          <input type="date" id="dataOrcamento">
+        </div>
+        <div class="meta-field">
+          <label for="validadeOrcamento">Válido até</label>
+          <input type="date" id="validadeOrcamento">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Tipo de Orçamento ---------- -->
+  <section class="card">
+    <h2 class="card__title">Tipo de documento</h2>
+    <div class="type-toggle" id="typeToggle" role="radiogroup" aria-label="Selecionar tipo de orçamento">
+      <button type="button" class="type-toggle__btn is-active" data-tipo="padrao" role="radio" aria-checked="true">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        <span>
+          <strong>Padrão</strong>
+          <small>Internet, equipamentos e serviços em geral</small>
+        </span>
+      </button>
+      <button type="button" class="type-toggle__btn" data-tipo="telefonia" role="radio" aria-checked="false">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 0 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>
+          <strong>Telefonia Fixa</strong>
+          <small>Proposta de portabilidade / linhas telefônicas</small>
+        </span>
+      </button>
+      <button type="button" class="type-toggle__btn" data-tipo="declaracao" role="radio" aria-checked="false">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M6 2h9l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v5h5M8 12h8M8 16h8"/></svg>
+        <span>
+          <strong>Documento</strong>
+          <small>Papel timbrado com texto livre e editável</small>
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ---------- Seletor de Empresa ---------- -->
+  <section class="card">
+    <h2 class="card__title">Empresa emissora</h2>
+    <div class="company-selector" id="companySelector" role="radiogroup" aria-label="Selecionar empresa">
+      <label class="company-option" data-empresa="maisvia">
+        <input type="radio" name="empresa" value="maisvia">
+        <span class="company-option__frame">
+          <img src="assets/logos/logo_maisvia.png" alt="+Vi@ Fibra">
+        </span>
+        <span class="company-option__label">+Vi@ Fibra</span>
+      </label>
+      <label class="company-option" data-empresa="newnitro">
+        <input type="radio" name="empresa" value="newnitro" checked>
+        <span class="company-option__frame">
+          <img src="assets/logos/logo_newnitro.png" alt="Nitro New">
+        </span>
+        <span class="company-option__label">Nitro New</span>
+      </label>
+      <label class="company-option" data-empresa="direct">
+        <input type="radio" name="empresa" value="direct">
+        <span class="company-option__frame">
+          <img src="assets/logos/logo_direct.png" alt="DIRECT">
+        </span>
+        <span class="company-option__label">DIRECT</span>
+      </label>
+    </div>
+
+    <div class="company-info" id="companyInfo">
+      <!-- Preenchido dinamicamente via JS -->
+    </div>
+
+    <div class="emitente-editor" id="emitenteEditor" hidden>
+      <div class="emitente-editor__header">
+        <div>
+          <h3>Dados da empresa no documento</h3>
+          <p>Fabio Silva e Fabio Castro podem corrigir manualmente estas informações para este orçamento.</p>
+        </div>
+        <button type="button" class="btn btn--ghost btn--sm" id="btnRestaurarEmitente">Restaurar cadastro</button>
+      </div>
+      <div class="form-grid">
+        <div class="field field--span2">
+          <label for="emitenteRazaoSocial">Razão social</label>
+          <input type="text" id="emitenteRazaoSocial" autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="emitenteNomeFantasia">Nome fantasia</label>
+          <input type="text" id="emitenteNomeFantasia" autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="emitenteCnpj">CNPJ</label>
+          <input type="text" id="emitenteCnpj" inputmode="numeric">
+        </div>
+        <div class="field field--span2">
+          <label for="emitenteEndereco">Endereço</label>
+          <input type="text" id="emitenteEndereco" autocomplete="street-address">
+        </div>
+        <div class="field">
+          <label for="emitenteBairro">Bairro</label>
+          <input type="text" id="emitenteBairro">
+        </div>
+        <div class="field">
+          <label for="emitenteCidade">Cidade</label>
+          <input type="text" id="emitenteCidade">
+        </div>
+        <div class="field">
+          <label for="emitenteUf">UF</label>
+          <input type="text" id="emitenteUf" maxlength="2">
+        </div>
+        <div class="field">
+          <label for="emitenteCep">CEP</label>
+          <input type="text" id="emitenteCep" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="emitenteTelefone">Telefone</label>
+          <input type="text" id="emitenteTelefone" inputmode="tel">
+        </div>
+        <div class="field">
+          <label for="emitenteEmail">E-mail</label>
+          <input type="email" id="emitenteEmail" autocomplete="email">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Dados do Cliente ---------- -->
+  <section class="card">
+    <h2 class="card__title">Dados do cliente</h2>
+    <div class="form-grid">
+      <div class="field field--span2">
+        <label for="clienteRazaoSocial">Razão social / Nome completo <span class="req">*</span></label>
+        <input type="text" id="clienteRazaoSocial" placeholder="Ex.: João da Silva Ltda" required>
+      </div>
+      <div class="field">
+        <label for="clienteDocumento">CPF/CNPJ <span class="req">*</span></label>
+        <input type="text" id="clienteDocumento" placeholder="000.000.000-00" required>
+      </div>
+      <div class="field">
+        <label for="clienteTelefone">Telefone <span class="req">*</span></label>
+        <input type="text" id="clienteTelefone" placeholder="(00) 00000-0000" required>
+      </div>
+      <div class="field field--span2">
+        <label for="clienteEmail">E-mail</label>
+        <input type="email" id="clienteEmail" placeholder="cliente@email.com">
+      </div>
+      <div class="field">
+        <label for="clienteCep">CEP</label>
+        <input type="text" id="clienteCep" placeholder="00000-000">
+      </div>
+      <div class="field field--span2">
+        <label for="clienteEndereco">Endereço</label>
+        <input type="text" id="clienteEndereco" placeholder="Rua, Avenida...">
+      </div>
+      <div class="field">
+        <label for="clienteNumero">Número</label>
+        <input type="text" id="clienteNumero" placeholder="Nº">
+      </div>
+      <div class="field">
+        <label for="clienteComplemento">Complemento</label>
+        <input type="text" id="clienteComplemento" placeholder="Apto, bloco...">
+      </div>
+      <div class="field">
+        <label for="clienteBairro">Bairro</label>
+        <input type="text" id="clienteBairro" placeholder="Bairro">
+      </div>
+      <div class="field">
+        <label for="clienteCidade">Cidade</label>
+        <input type="text" id="clienteCidade" placeholder="Cidade">
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Detalhes da Proposta de Telefonia (visível apenas no tipo "Telefonia Fixa") ---------- -->
+  <section class="card card--telefonia is-hidden" id="cardTelefonia">
+    <h2 class="card__title">Detalhes da proposta de telefonia</h2>
+    <p class="card__subtitle">Estes campos preenchem o texto do documento gerado. Tudo é editável — ajuste como quiser para cada cliente. Em qualquer campo de texto abaixo você pode usar <code>{empresa}</code>, <code>{prazo}</code> ou <code>{pabx}</code> para inserir esses valores automaticamente.</p>
+
+    <div class="form-grid">
+      <div class="field field--span2">
+        <label for="telSituacaoAtual">Situação atual</label>
+        <textarea id="telSituacaoAtual" rows="3" placeholder="Ex.: Após análise da necessidade apresentada, elaboramos uma solução para manter a operação telefônica da empresa, preservando os números atuais..."></textarea>
+      </div>
+      <div class="field field--span2">
+        <label for="telSolucaoTexto">Texto introdutório da solução</label>
+        <textarea id="telSolucaoTexto" rows="2" placeholder="Ex.: A solução contempla a portabilidade das linhas para a {empresa} e a instalação dos equipamentos necessários."></textarea>
+        <span class="field-hint">Use <code>{empresa}</code>, <code>{prazo}</code> ou <code>{pabx}</code> para inserir automaticamente o nome da empresa, o prazo de portabilidade e o status da central PABX.</span>
+      </div>
+    </div>
+
+    <div class="telefonia-subgrid">
+      <div class="field">
+        <label for="telPrazoPortabilidade">Prazo de portabilidade (horas)</label>
+        <input type="text" id="telPrazoPortabilidade" inputmode="numeric" placeholder="72">
+      </div>
+      <div class="field field--checkbox">
+        <label class="checkbox-label">
+          <input type="checkbox" id="telManutencaoPabx">
+          <span>Mantém a central PABX já utilizada pelo cliente</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="editable-list-block">
+      <div class="editable-list-block__header">
+        <label>O que será realizado</label>
+        <button type="button" class="btn btn--ghost btn--sm" id="btnAddRealizacao">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Adicionar item</span>
+        </button>
+      </div>
+      <div class="editable-list" id="telRealizacoesList"></div>
+    </div>
+
+    <div class="field">
+      <label for="telObservacaoComodato">Destaque / observação importante (opcional)</label>
+      <textarea id="telObservacaoComodato" rows="2" placeholder="Ex.: O equipamento ATA será fornecido em comodato, sem custo de aquisição para o cliente."></textarea>
+    </div>
+
+    <div class="editable-list-block">
+      <div class="editable-list-block__header">
+        <label>Benefícios</label>
+        <button type="button" class="btn btn--ghost btn--sm" id="btnAddBeneficio">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Adicionar benefício</span>
+        </button>
+      </div>
+      <div class="editable-list" id="telBeneficiosList"></div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field field--span2">
+        <label for="telConsideracoesFinais">Considerações finais</label>
+        <textarea id="telConsideracoesFinais" rows="3" placeholder="Ex.: A solução apresentada foi desenvolvida para manter a estrutura atual da empresa, aproveitando a central PABX existente..."></textarea>
+      </div>
+      <div class="field field--span2">
+        <label for="telObservacaoFinal">Observação final (opcional)</label>
+        <textarea id="telObservacaoFinal" rows="2" placeholder="Ex.: O ATA foi dimensionado conforme orientação do técnico responsável..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Declaração / Papel timbrado ---------- -->
+  <section class="card card--declaracao is-hidden" id="cardDeclaracao">
+    <h2 class="card__title">Documento em papel timbrado</h2>
+    <p class="card__subtitle">Edite livremente o conteúdo da declaração. Selecione um trecho para alterar o tamanho da fonte ou aplicar negrito. Palavras e frases em CAIXA ALTA (ex.: CONTRATANTE, PRESTADORA) continuam em negrito automaticamente.</p>
+    <div class="form-grid">
+      <div class="field field--span2">
+        <label for="declTitulo">Título da declaração</label>
+        <input type="text" id="declTitulo" placeholder="Ex.: DECLARAÇÃO DE MANUTENÇÃO DA CLÁUSULA DE FIDELIDADE">
+      </div>
+      <div class="field">
+        <label for="declReferencia">Referência</label>
+        <input type="text" id="declReferencia" placeholder="Ex.: Termo de Adesão nº 227611">
+      </div>
+      <div class="field">
+        <label for="declDocumentoRelacionado">Documento relacionado</label>
+        <input type="text" id="declDocumentoRelacionado" placeholder="Ex.: Contrato de Permanência">
+      </div>
+      <div class="field field--span2">
+        <label for="declCorpoEditor">Texto da declaração</label>
+        <div class="declaracao-toolbar" role="toolbar" aria-label="Formatação do texto da declaração">
+          <button type="button" class="btn btn--ghost btn--sm" data-decl-command="bold" title="Aplicar ou remover negrito"><strong>B</strong> Negrito</button>
+          <label class="declaracao-toolbar__size" for="declFontSize">Tamanho</label>
+          <select id="declFontSize" aria-label="Tamanho da fonte">
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12" selected>12</option>
+            <option value="14">14</option>
+            <option value="16">16</option>
+            <option value="18">18</option>
+            <option value="20">20</option>
+            <option value="24">24</option>
+            <option value="28">28</option>
+          </select>
+        </div>
+        <div id="declCorpoEditor" class="declaracao-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Digite aqui o texto completo da declaração..."></div>
+        <textarea id="declCorpo" class="declaracao-editor__compat" tabindex="-1" aria-hidden="true"></textarea>
+      </div>
+      <div class="field">
+        <label for="declLocal">Local</label>
+        <input type="text" id="declLocal" placeholder="Ex.: Olímpia/SP">
+      </div>
+      <div class="field">
+        <label for="declDataTexto">Data exibida</label>
+        <input type="text" id="declDataTexto" placeholder="Ex.: 24 de setembro de 2026">
+      </div>
+    </div>
+    <div class="declaracao-options">
+      <label class="checkbox-label">
+        <input type="checkbox" id="declMostrarCliente" checked>
+        <span>Mostrar assinatura do cliente</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ---------- Tabela de Produtos ---------- -->
+  <section class="card" id="cardItens">
+    <div class="card__header-row">
+      <h2 class="card__title" id="itemsCardTitle">Produtos e serviços</h2>
+      <button class="btn btn--primary btn--sm" id="btnAddItem">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Adicionar item</span>
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="items-table" id="itemsTable">
+        <thead>
+          <tr>
+            <th class="col-item">Item</th>
+            <th class="col-desc">Descrição</th>
+            <th class="col-qtd">Qtd.</th>
+            <th class="col-valor">Valor unit.</th>
+            <th class="col-subtotal">Subtotal</th>
+            <th class="col-acao"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsTableBody">
+          <!-- Linhas inseridas via JS -->
+        </tbody>
+      </table>
+    </div>
+    <p class="empty-hint" id="emptyItemsHint">Nenhum item adicionado. Clique em <strong>Adicionar item</strong> para começar.</p>
+  </section>
+
+  <!-- ---------- Totais ---------- -->
+  <section class="card card--totals" id="cardTotais">
+    <div class="totals-grid">
+      <div class="discount-box">
+        <h2 class="card__title">Desconto</h2>
+        <div class="discount-toggle" role="tablist">
+          <button type="button" class="discount-toggle__btn is-active" data-tipo="valor" role="tab">R$</button>
+          <button type="button" class="discount-toggle__btn" data-tipo="percentual" role="tab">%</button>
+        </div>
+        <div class="field">
+          <label for="descontoValor" class="sr-only">Valor do desconto</label>
+          <input type="text" id="descontoValor" placeholder="0,00" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="totals-summary">
+        <div class="totals-summary__row">
+          <span>Subtotal</span>
+          <strong id="somaSubtotal">R$ 0,00</strong>
+        </div>
+        <div class="totals-summary__row totals-summary__row--discount">
+          <span>Desconto</span>
+          <strong id="somaDesconto">- R$ 0,00</strong>
+        </div>
+        <div class="totals-summary__row totals-summary__row--final">
+          <span id="somaFinalLabel">Valor final</span>
+          <strong id="somaFinal">R$ 0,00</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Observações e Condições ---------- -->
+  <section class="card" id="cardObservacoes">
+    <div class="form-grid">
+      <div class="field field--span2">
+        <label for="observacoes">Observações</label>
+        <textarea id="observacoes" rows="4" placeholder="Observações adicionais sobre o orçamento..."></textarea>
+      </div>
+      <div class="field field--span2">
+        <label for="condicoes">Condições comerciais</label>
+        <textarea id="condicoes" rows="3">Primeira mensalidade paga no ato da contratação.</textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Assinatura ---------- -->
+  <section class="card" id="cardAssinatura">
+    <h2 class="card__title">Responsável comercial</h2>
+    <p class="card__subtitle">Selecione quem vai assinar este orçamento.</p>
+    <div class="responsavel-selector" id="responsavelSelector" role="radiogroup" aria-label="Selecionar responsável comercial">
+      <!-- Preenchido dinamicamente via JS, conforme a empresa selecionada -->
+    </div>
+    <div class="responsavel-custom" id="responsavelCustom" hidden>
+      <div class="field">
+        <label for="responsavelNome">Nome do responsável</label>
+        <input type="text" id="responsavelNome" autocomplete="off" placeholder="Nome completo">
+      </div>
+      <div class="field">
+        <label for="responsavelCargo">Cargo</label>
+        <input type="text" id="responsavelCargo" autocomplete="off" placeholder="Cargo">
+      </div>
+    </div>
+    <div class="signature-preview" id="signaturePreview">
+      <!-- Preenchido dinamicamente via JS -->
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <p>Sistema de Orçamentos — Telecomunicações © <span id="anoAtual"></span></p>
+</footer>
+
+<!-- ======================= MODAIS ======================= -->
+
+<div class="modal-overlay" id="modalOverlay">
+
+  <div class="modal" id="modalNovo" role="dialog" aria-modal="true" aria-labelledby="modalNovoTitle">
+    <h3 id="modalNovoTitle">Novo orçamento</h3>
+    <p>Isso vai limpar todos os dados atuais e iniciar um novo número de orçamento. Deseja continuar?</p>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" data-close-modal>Cancelar</button>
+      <button class="btn btn--primary" id="confirmNovo">Criar novo</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modalSenha" role="dialog" aria-modal="true" aria-labelledby="modalSenhaTitle">
+    <h3 id="modalSenhaTitle">Acesso restrito</h3>
+    <p id="senhaTexto">Digite a senha para usar esta opção.</p>
+    <div class="field">
+      <input type="password" id="senhaResponsavel" autocomplete="new-password" aria-label="Senha">
+      <span class="field-error" id="senhaErro" hidden>Senha incorreta.</span>
+    </div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" data-close-modal>Cancelar</button>
+      <button class="btn btn--primary" id="confirmSenha">Confirmar</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modalLimpar" role="dialog" aria-modal="true" aria-labelledby="modalLimparTitle">
+    <h3 id="modalLimparTitle">Limpar formulário</h3>
+    <p>Todos os campos preenchidos serão apagados. Essa ação não pode ser desfeita. Deseja continuar?</p>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" data-close-modal>Cancelar</button>
+      <button class="btn btn--danger" id="confirmLimpar">Limpar tudo</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modalRemoverItem" role="dialog" aria-modal="true" aria-labelledby="modalRemoverTitle">
+    <h3 id="modalRemoverTitle">Remover item</h3>
+    <p>Deseja remover este item do orçamento?</p>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" data-close-modal>Cancelar</button>
+      <button class="btn btn--danger" id="confirmRemoverItem">Remover</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modalCarregar" role="dialog" aria-modal="true" aria-labelledby="modalCarregarTitle">
+    <h3 id="modalCarregarTitle">Continuar último orçamento?</h3>
+    <p>Encontramos um rascunho salvo automaticamente. Deseja continuar de onde parou?</p>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="descartarRascunho">Descartar</button>
+      <button class="btn btn--primary" id="confirmCarregar">Continuar</button>
+    </div>
+  </div>
+
+  <div class="modal modal--large" id="modalPreview" role="dialog" aria-modal="true" aria-labelledby="modalPreviewTitle">
+    <div class="modal__header">
+      <h3 id="modalPreviewTitle">Prévia do orçamento</h3>
+      <button class="btn btn--icon-only" data-close-modal aria-label="Fechar">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal__preview-body" id="previewBody">
+      <!-- Conteúdo do PDF renderizado via JS -->
+    </div>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" data-close-modal>Fechar</button>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ======================= SCRIPTS DO SISTEMA ======================= -->
+<script src="js/utils.js"></script>
+<script src="js/empresas.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+</html>
